@@ -1,25 +1,16 @@
-on("chat:message", function(msg) {
-var cmdName = "!diplomacyCheck";
-var msgTxt = msg.content;
-var cmdNamePortion = msgTxt.slice (0, cmdName.length);
+//Pathfinder Diplomacy Script v1.1 -- Last Updated 09/18/15
+//Written by Brent T. contact: https://app.roll20.net/users/391008/brent-t
+//GitHub: https://github.com/Cephalopd/Roll20ScriptsMASTER/blob/master/DiplomacyScript.js
 
-var diplomacyCheckScore = parseInt(msgTxt.slice (cmdName.length));
-if (msg.type !== 'api') return;
-if (cmdNamePortion !== cmdName) return;
 
-if (msg.selected) {
-var selectedTokenID = msg.selected[0]._id
-
-//This function gets the target attribute of the chracter represented by the selected token. 
-//If the target attribute does not exist then it creates it and sets and returns the defalut value specified by the defaultAttributeValue function
+//This function checks that the selected token represents a character
 var checkTokenRepresents = function (tokenID) {
     var token = findObjs({type: 'graphic', _id: tokenID })[0];
     var character = findObjs({type: 'character', _id: token.get('represents')})[0];
     return character
 }
-
-if (checkTokenRepresents (selectedTokenID)) {
-
+//This function gets the target attribute of the chracter represented by the selected token. 
+//If the target attribute does not exist then it creates it and sets and returns the defalut value specified by the defaultAttributeValue function
 var getCharacterAttribute = function (tokenID, target) {
     var token = findObjs({type: 'graphic', _id: tokenID })[0];
     var character = findObjs({type: 'character', _id: token.get('represents')})[0];
@@ -75,7 +66,7 @@ var diplomacyDCDisposition = function (tokenID) {
     }
 
     };
-    
+
 //This function gets the CHA-mod of the character represented by the selected token.   
     var getCHAMod = function (tokenID) {
     var chaBaseValue = parseInt(getCharacterAttribute(tokenID, 'CHA-base'))
@@ -89,84 +80,55 @@ var diplomacyDCDisposition = function (tokenID) {
     return chaModValue
 }
 
+//This function returns the new disposition of a character based on the Pathfinder diplomacy rules.
+var adjustedDisposition = function(start,steps){
+  var dispositions = ['Hostile', 'Unfriendly', 'Indifferent', 'Friendly', 'Helpful'];
+  return dispositions[ 
+    Math.max(0,Math.min(dispositions.length-1,
+      ( -1 !== _.indexOf(dispositions, start) ? _.indexOf(dispositions, start) : 2 )
+      + (_.isNumber(steps) ? steps : 0)
+    ))
+  ];
+};
+
+//This section of the code handles the code input of the script.	
+on("chat:message", function(msg) {
+var cmdName = "!diplomacyCheck";
+var msgTxt = msg.content;
+var cmdNamePortion = msgTxt.slice (0, cmdName.length);
+
+var diplomacyCheckScore = parseInt(msgTxt.slice (cmdName.length));
+if (msg.type !== 'api' || !playerIsGM(msg.playerid)) return;
+if (cmdNamePortion !== cmdName) return;
+
+if (msg.selected) {
+	
+var selectedTokenID = msg.selected[0]._id
+
+if (checkTokenRepresents (selectedTokenID)) {
+
 var totalDC = diplomacyDCDisposition (selectedTokenID) + getCHAMod (selectedTokenID);
 
 if (diplomacyCheckScore) {
     if (diplomacyCheckScore >= totalDC + 5) {
-    var stepUpDispositionTwo = function (tokenID, attribute) {
-        var startingDisposition = getCharacterAttribute (tokenID, attribute)
-    switch (startingDisposition){
-        case 'Hostile':
-            return 'Indifferent';
-        break;
-        case 'Unfriendly':
-            return 'Friendly';
-        break;
-        case 'Indifferent':
-            return 'Helpful';
-        default:
-            return 'Indifferent';
-    };
-    };
-    var newDisposition = stepUpDispositionTwo (selectedTokenID, 'Disposition');
+    var newDisposition = adjustedDisposition (getCharacterAttribute(selectedTokenID, 'Disposition'), 2);
     setCharacterAttribute (selectedTokenID, 'Disposition', newDisposition);
     sendChat (msg.who, "/w gm Diplomacy Check VERY Successful! Character is now " + getCharacterAttribute(selectedTokenID, 'Disposition'))
 } else if (diplomacyCheckScore >= totalDC) {
-    var stepUpDisposition = function (tokenID, attribute) {
-        var startingDisposition = getCharacterAttribute (tokenID, attribute)
-    switch (startingDisposition){
-        case 'Hostile':
-            return 'Unfriendly';
-        break;
-        case 'Unfriendly':
-            return 'Indifferent';
-        break;
-        case 'Indifferent':
-            return 'Friendly';
-        case 'Friendly':
-            return 'Helpful';
-        break;
-        default:
-            return 'Indifferent';
-    };
-    };
-    var newDisposition = stepUpDisposition (selectedTokenID, 'Disposition');
+    var newDisposition = adjustedDisposition (getCharacterAttribute(selectedTokenID, 'Disposition'), 1);
     sendChat (msg.who, "/w gm Diplomacy Check Successful! Character is now " + getCharacterAttribute(selectedTokenID, 'Disposition'))
 } else if (diplomacyCheckScore >= totalDC - 4) {
     sendChat (msg.who, "/w gm Diplomacy check is ineffectual. Character remains " + getCharacterAttribute(selectedTokenID, 'Disposition'))
 } else {
-    var stepDownDisposition = function (tokenID, attribute) {
-        var startingDisposition = getCharacterAttribute (tokenID, attribute)
-    switch (startingDisposition){
-        case 'Helpful':
-            return 'Friendly';
-        break;
-        case 'Friendly':
-            return 'Indifferent';
-        break;
-        case 'Indifferent':
-            return 'Unfriendly';
-        case 'Unfriendly':
-            return 'Hostile';
-        break;
-        default:
-            return 'Indifferent';
-    };
-    };
-    var newDisposition = stepDownDisposition (selectedTokenID, 'Disposition');
+    var newDisposition = adjustedDisposition (getCharacterAttribute(selectedTokenID, 'Disposition'), -1);
     setCharacterAttribute (selectedTokenID, 'Disposition', newDisposition);
     sendChat (msg.who, "/w gm Diplomacy Check Fails! Character is now " + getCharacterAttribute(selectedTokenID, 'Disposition'))
 }
-
 } else {
     var currentDisposition = getCharacterAttribute (selectedTokenID, 'Disposition')
-    sendChat (msg.who, "/w gm Character is " + currentDisposition + " and has a base DC of " + totalDC)
-    
+    sendChat (msg.who, "/w gm Character is " + currentDisposition + " and has a base DC of " + totalDC)   
 }
-
 //END CODE FOR SELECTED TOKEN
-
-
 } else {
     sendChat (msg.who, "/w gm Selected token does not represent a character")
 }
@@ -174,6 +136,4 @@ if (diplomacyCheckScore) {
 else {
     sendChat(msg.who, "/w gm Please select a token")
 }
-
-// END MSG CODE HERE
 });
