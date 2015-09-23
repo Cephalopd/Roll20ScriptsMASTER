@@ -1,4 +1,4 @@
-//Pathfinder Diplomacy Script v1.2 -- Last Updated 09/18/15
+//Pathfinder Diplomacy Script v1.3 -- Last Updated 09/22/15
 //Written by Brent T. contact: https://app.roll20.net/users/391008/brent-t
 //GitHub: https://github.com/Cephalopd/Roll20ScriptsMASTER/blob/master/DiplomacyScript.js
 
@@ -12,8 +12,11 @@ var checkTokenRepresents = function (tokenID) {
         return tokenCharacterCache[tokenID].character;
     } 
 
-    var token = findObjs({type: 'graphic', _id: tokenID })[0];
-    var character = findObjs({type: 'character', _id: token.get('represents')})[0];
+    var token = getObj('graphic', tokenID );
+    if(token) {
+      var character = getObj('character', token.get('represents'));
+    }
+
     tokenCharacterCache[tokenID]={
         token: token,
         character: character
@@ -96,7 +99,7 @@ if (msg.type !== 'api' || !playerIsGM(msg.playerid)) return;
 if (cmdNamePortion !== cmdName) return;
 
 if (msg.selected) {
-	
+    
 var selectedTokenID = msg.selected[0]._id
 
 if (checkTokenRepresents (selectedTokenID)) {
