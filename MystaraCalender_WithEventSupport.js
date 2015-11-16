@@ -1,4 +1,5 @@
 var Calendar = Calendar || {
+    //Modified with event tracking code
     version: 1.4,
     lunarPhaseSize: 15,
     lunarPhasesImage: 'https://s3.amazonaws.com/files.d20.io/images/4277527/CJJWBbiHx3jHglPdccPx3A/max.png?1401939451',
@@ -387,7 +388,7 @@ var Calendar = Calendar || {
             } else {
                 var eventsLength = Calendar.eventArray.length
                 var lastEvent = Calendar.eventArray[eventsLength - 1]
-                returnEvents (currentIndex, calcDateIndex (lastEvent[1],lastEvent[2],lastEvent[3]));
+                returnEvents (currentIndex, lastEvent[1]);
             };
         };
         
@@ -457,6 +458,16 @@ var Calendar = Calendar || {
             }
         };
         
+        var returnEventRange = function (direction, title) {
+            if (tokens[1]) {
+                    var eventsMessage = Calendar.buildEventTable(direction, title + " (" + tokens[1] + " days)",parseInt(tokens[1]))
+                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                } else {
+                    var eventsMessage = Calendar.buildEventTable(direction,"All " +title)
+                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                }
+        };
+        
         switch (cmd)
         {
             case 'month': 
@@ -516,7 +527,7 @@ var Calendar = Calendar || {
                         Calendar.addCalendarEvent (concatenateEventName(3),state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year);
                         sendMsg ("Your PUBLIC event has been added TODAY");
                     };   
-                } else {
+                } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === false && isNaN(parseInt(tokens[3])) === false) {
                     if (tokens[4].toUpperCase() === "GM" ) {
                         Calendar.addCalendarEvent (concatenateEventName(4),parseInt(tokens[1]),parseInt(tokens[2]),parseInt(tokens[3]),"GM");
                         sendMsg ("Your GM event has been added at the SPECIFIED DATE")
@@ -530,27 +541,15 @@ var Calendar = Calendar || {
             case 'RemoveEvent':
                 targetName = concatenateEventName(1)
                 Calendar.removeCalendarEvent (targetName);
-                sendMsg ("You have removed events named -- " + targetName)
+                sendMsg ("You have removed the event named -- " + targetName)
                 break;
                 
             case 'GetPastEvents':
-                if (tokens[1]) {
-                    var eventsMessage = Calendar.buildEventTable(-1,"Past Events (" + tokens[1] + " days)",parseInt(tokens[1]))
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
-                } else {
-                    var eventsMessage = Calendar.buildEventTable(-1,"All Past Events")
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
-                }
+                returnEventRange (-1,"Past Events");
                 break;
             
             case 'GetFutureEvents':
-                if (tokens[1]) {
-                    var eventsMessage = Calendar.buildEventTable(1,"Future Events (" + tokens[1] + " days)",parseInt(tokens[1]))
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
-                } else {
-                    var eventsMessage = Calendar.buildEventTable(1,"All Future Events")
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
-                }
+                returnEventRange (1,"Upcoming Events");
                 break;
                 
             case 'GetPresentEvents':
@@ -560,24 +559,12 @@ var Calendar = Calendar || {
             
             case 'DisplayPastEvents':
                 playerGM = 0
-                if (tokens[1]) {
-                    var eventsMessage = Calendar.buildEventTable(-1,"Past Events (" + tokens[1] + " days)",parseInt(tokens[1]))
-                    sendChat ("CalendarEvents",eventsMessage);
-                } else {
-                    var eventsMessage = Calendar.buildEventTable(-1,"All Past Events")
-                    sendChat ("CalendarEvents",eventsMessage);
-                }
+                returnEventRange (-1,"Past Events");
                 break;
             
             case 'DisplayFutureEvents':
                 playerGM = 0
-                if (tokens[1]) {
-                    var eventsMessage = Calendar.buildEventTable(1,"Future Events (" + tokens[1] + " days)",parseInt(tokens[1]))
-                    sendChat ("CalendarEvents",eventsMessage);
-                } else {
-                    var eventsMessage = Calendar.buildEventTable(1,"All Future Events")
-                    sendChat ("CalendarEvents",eventsMessage);
-                }
+                returnEventRange (1,"Upcoming Events");
                 break;
                 
             case 'DisplayPresentEvents':
