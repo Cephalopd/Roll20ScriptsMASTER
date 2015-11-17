@@ -69,7 +69,8 @@ var Calendar = Calendar || {
                         'Eirmont',
                         'Kaldmont'],
                     yearPrefix: 'AC '
-                }
+                },
+    			events: []
             }
         }
     },
@@ -275,8 +276,6 @@ var Calendar = Calendar || {
         sendChat('','/direct '+Calendar._GetYearForDate(d,opt));
     },
     
-    currentDate: state.Calendar.now,
-    eventArray: state.Calendar.events,
     playerGM: 0,
     senderID: '',
     
@@ -293,26 +292,26 @@ var Calendar = Calendar || {
     },
     
     spliceEventIn: function (location,name,index,gm){
-                var allEvents = Calendar.eventArray
+                var allEvents = state.Calendar.events
                 allEvents.splice(location,0,[name,index,gm]);
-                Calendar.eventArray = allEvents
+                state.Calendar.events = allEvents
     },
     
     addCalendarEvent: function (name,day,month,year,gm) {
-            var firstEvent = Calendar.eventArray[0]
-            var endEvents = Calendar.eventArray.length - 1
-            var lastEvent = Calendar.eventArray[endEvents]
+            var firstEvent = state.Calendar.events[0]
+            var endEvents = state.Calendar.events.length - 1
+            var lastEvent = state.Calendar.events[endEvents]
             var newEventIndex = Calendar.calcDateIndex (day,month,year)
-            if (Calendar.eventArray[0]) {
+            if (state.Calendar.events[0]) {
                 if (newEventIndex < firstEvent[1]) {
                     Calendar.spliceEventIn (0,name,newEventIndex,gm);
                     return;
                 } else if (newEventIndex > lastEvent[1]) {
-                    Calendar.spliceEventIn (Calendar.eventArray.length,name,newEventIndex,gm);
+                    Calendar.spliceEventIn (state.Calendar.events.length,name,newEventIndex,gm);
                     return;
                 } else {
-                    for (var i = 0; i < Calendar.eventArray.length; i++) {
-                        var thisEvent = Calendar.eventArray[i]
+                    for (var i = 0; i < state.Calendar.events.length; i++) {
+                        var thisEvent = state.Calendar.events[i]
                         var thisEventIndex = thisEvent[1]
                         if (newEventIndex <= thisEventIndex) {
                             Calendar.spliceEventIn (i,name,newEventIndex,gm);
@@ -327,18 +326,18 @@ var Calendar = Calendar || {
     },
     
     removeCalendarEvent: function (name) {
-        if (Calendar.eventArray[0]) {
-            for (var i = 0; i < Calendar.eventArray.length; i++) {
-                var thisEvent = Calendar.eventArray[i]
+        if (state.Calendar.events[0]) {
+            for (var i = 0; i < state.Calendar.events.length; i++) {
+                var thisEvent = state.Calendar.events[i]
                 if (name.toUpperCase() == thisEvent[0].toUpperCase()) {
-                    Calendar.eventArray.splice(i,1)
+                    state.Calendar.events.splice(i,1)
                 };
             };
         };
     },
     
     getEvents: function (direction,limit) {
-        var currentIndex = Calendar.calcDateIndex (Calendar.currentDate.day,Calendar.currentDate.month,Calendar.currentDate.year)
+        var currentIndex = Calendar.calcDateIndex (state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year)
         var findEdgeIndex = function (direction,limit,start) {
             if (direction == -1) {
                 return start - limit;
@@ -350,11 +349,11 @@ var Calendar = Calendar || {
         var allRecordedEvents = []
         
         var returnEvents = function (start,end) {
-            for (var i = 0; i < Calendar.eventArray.length; i++) {
-                thisEvent = Calendar.eventArray[i]
+            for (var i = 0; i < state.Calendar.events.length; i++) {
+                thisEvent = state.Calendar.events[i]
                 thisEventIndex = thisEvent[1]
                 if (thisEventIndex >= start && thisEventIndex <= end ) {
-                    allRecordedEvents.splice(Calendar.eventArray.length,0,thisEvent)
+                    allRecordedEvents.splice(state.Calendar.events.length,0,thisEvent)
                 }
             };
         };
@@ -386,8 +385,8 @@ var Calendar = Calendar || {
             if (direction == -1) {
                 returnEvents (0,currentIndex);
             } else {
-                var eventsLength = Calendar.eventArray.length
-                var lastEvent = Calendar.eventArray[eventsLength - 1]
+                var eventsLength = state.Calendar.events.length
+                var lastEvent = state.Calendar.events[eventsLength - 1]
                 returnEvents (currentIndex, lastEvent[1]);
             };
         };
@@ -461,10 +460,10 @@ var Calendar = Calendar || {
         var returnEventRange = function (direction, title) {
             if (tokens[2]) {
                     var eventsMessage = Calendar.buildEventTable(direction, title + " (" + tokens[2] + " days)",parseInt(tokens[2]))
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                    return eventsMessage;
                 } else {
                     var eventsMessage = Calendar.buildEventTable(direction,"All " +title)
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                    return eventsMessage;
                 }
         };
         
@@ -547,12 +546,12 @@ var Calendar = Calendar || {
             case 'GetEvents':
                 var targetFrame = tokens[1].toUpperCase()
                 if (targetFrame === "PAST" ) {
-                    returnEventRange (-1,"Past Events");
+                    sendChat ("CalendarEvents","/w " + senderID + returnEventRange (-1,"Past Events"));
                 } else if (targetFrame === "PRESENT") {
                     var eventsMessage = eventsToday ()
                     sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
                 } else if (targetFrame === "FUTURE") {
-                    returnEventRange (1,"Upcoming Events");
+                    sendChat ("CalendarEvents","/w " + senderID + returnEventRange (1,"Upcoming Events"));
                 };
                 break;
             
@@ -560,12 +559,12 @@ var Calendar = Calendar || {
                 playerGM = 0
                 var targetFrame = tokens[1].toUpperCase()
                 if (targetFrame === "PAST" ) {
-                    returnEventRange (-1,"Past Events");
+                    sendChat ("CalendarEvents", returnEventRange (-1,"Past Events"));
                 } else if (targetFrame === "PRESENT") {
                     var eventsMessage = eventsToday ()
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                    sendChat ("CalendarEvents", eventsMessage);
                 } else if (targetFrame === "FUTURE") {
-                    returnEventRange (1,"Upcoming Events");
+                    sendChat ("CalendarEvents", returnEventRange (1,"Upcoming Events"));
                 };
                 break;
         }
