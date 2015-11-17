@@ -459,8 +459,8 @@ var Calendar = Calendar || {
         };
         
         var returnEventRange = function (direction, title) {
-            if (tokens[1]) {
-                    var eventsMessage = Calendar.buildEventTable(direction, title + " (" + tokens[1] + " days)",parseInt(tokens[1]))
+            if (tokens[2]) {
+                    var eventsMessage = Calendar.buildEventTable(direction, title + " (" + tokens[2] + " days)",parseInt(tokens[2]))
                     sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
                 } else {
                     var eventsMessage = Calendar.buildEventTable(direction,"All " +title)
@@ -544,33 +544,29 @@ var Calendar = Calendar || {
                 sendMsg ("You have removed the event named -- " + targetName)
                 break;
                 
-            case 'GetPastEvents':
-                returnEventRange (-1,"Past Events");
+            case 'GetEvents':
+                var targetFrame = tokens[1].toUpperCase()
+                if (targetFrame === "PAST" ) {
+                    returnEventRange (-1,"Past Events");
+                } else if (targetFrame === "PRESENT") {
+                    var eventsMessage = eventsToday ()
+                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                } else if (targetFrame === "FUTURE") {
+                    returnEventRange (1,"Upcoming Events");
+                };
                 break;
             
-            case 'GetFutureEvents':
-                returnEventRange (1,"Upcoming Events");
-                break;
-                
-            case 'GetPresentEvents':
-                var eventsMessage = eventsToday ()
-                sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
-                break;
-            
-            case 'DisplayPastEvents':
+            case 'DisplayEvents':
                 playerGM = 0
-                returnEventRange (-1,"Past Events");
-                break;
-            
-            case 'DisplayFutureEvents':
-                playerGM = 0
-                returnEventRange (1,"Upcoming Events");
-                break;
-                
-            case 'DisplayPresentEvents':
-                playerGM = 0
-                var eventsMessage = eventsToday ()
-                sendChat ("CalendarEvents",eventsMessage);
+                var targetFrame = tokens[1].toUpperCase()
+                if (targetFrame === "PAST" ) {
+                    returnEventRange (-1,"Past Events");
+                } else if (targetFrame === "PRESENT") {
+                    var eventsMessage = eventsToday ()
+                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                } else if (targetFrame === "FUTURE") {
+                    returnEventRange (1,"Upcoming Events");
+                };
                 break;
         }
         
