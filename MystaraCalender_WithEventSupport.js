@@ -70,7 +70,7 @@ var Calendar = Calendar || {
                         'Kaldmont'],
                     yearPrefix: 'AC '
                 },
-    			events: []
+        		events: []
             }
         }
     },
@@ -445,7 +445,7 @@ var Calendar = Calendar || {
         };
         
         var sendMsg = function (message) {
-            sendChat ("CalendarEvents", "/w " + senderID + " " + message)  
+            sendChat ("CalendarEvents", "/w " + senderID[0] + " " + message)  
         };
         
         var eventsToday = function () {
@@ -534,7 +534,18 @@ var Calendar = Calendar || {
                         Calendar.addCalendarEvent (concatenateEventName(4),parseInt(tokens[1]),parseInt(tokens[2]),parseInt(tokens[3]));
                         sendMsg ("Your PUBLIC event has been added at the SPECIFIED DATE")
                     };
-                };
+                } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === true) {
+					var currentIndex = Calendar.calcDateIndex (state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year);
+					var newIndex = currentIndex + parseInt(tokens[1])
+					var newDate = Calendar.calcIndexToDate (newIndex)
+					if (tokens[2].toUpperCase === "GM") {
+						Calendar.addCalendarEvent(concatenateEventName(3),newDate[0],newDate[1],newDate[2],"GM");
+						sendMsg ("Your GM event has been added " + tokens[1] + " days from today");
+					} else {
+						Calendar.addCalendarEvent(concatenateEventName(2),newDate[0],newDate[1],newDate[2],"GM");
+						sendMsg ("Your PUBLIC event has been added " + tokens[1] + " days from today");
+					};
+				};
                 break;
             
             case 'RemoveEvent':
@@ -546,12 +557,12 @@ var Calendar = Calendar || {
             case 'GetEvents':
                 var targetFrame = tokens[1].toUpperCase()
                 if (targetFrame === "PAST" ) {
-                    sendChat ("CalendarEvents","/w " + senderID + returnEventRange (-1,"Past Events"));
+                    sendChat ("CalendarEvents","/w " + senderID[0] + returnEventRange (-1,"Past Events"));
                 } else if (targetFrame === "PRESENT") {
                     var eventsMessage = eventsToday ()
-                    sendChat ("CalendarEvents","/w " + senderID + eventsMessage);
+                    sendChat ("CalendarEvents","/w " + senderID[0] + eventsMessage);
                 } else if (targetFrame === "FUTURE") {
-                    sendChat ("CalendarEvents","/w " + senderID + returnEventRange (1,"Upcoming Events"));
+                    sendChat ("CalendarEvents","/w " + senderID[0] + returnEventRange (1,"Upcoming Events"));
                 };
                 break;
             
@@ -583,7 +594,7 @@ var Calendar = Calendar || {
             var tokenized = msg.content.split(" ");
             var command = tokenized[0];
             var sendingPlayerID = msg.playerid
-            senderID = msg.who
+            senderID = msg.who.split(" ")
             playerGM = playerIsGM(sendingPlayerID);
 
             switch(command)
