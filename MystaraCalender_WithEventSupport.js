@@ -287,6 +287,10 @@ var Calendar = Calendar || {
         var year = Math.floor(index / 336)
         var month = Math.floor((index % 336) / 28) + 1
         var day = Math.floor((index % 336) % 28)
+		if (day === 0) {
+			day = 28
+			month = month - 1
+		}
         var dateArray = [day,month,year]
         return dateArray;
     },
@@ -542,7 +546,7 @@ var Calendar = Calendar || {
 						Calendar.addCalendarEvent(concatenateEventName(3),newDate[0],newDate[1],newDate[2],"GM");
 						sendMsg ("Your GM event has been added " + tokens[1] + " days from today");
 					} else {
-						Calendar.addCalendarEvent(concatenateEventName(2),newDate[0],newDate[1],newDate[2],"GM");
+						Calendar.addCalendarEvent(concatenateEventName(2),newDate[0],newDate[1],newDate[2]);
 						sendMsg ("Your PUBLIC event has been added " + tokens[1] + " days from today");
 					};
 				};
