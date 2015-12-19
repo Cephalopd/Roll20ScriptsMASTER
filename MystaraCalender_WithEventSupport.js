@@ -70,8 +70,12 @@ var Calendar = Calendar || {
                         'Kaldmont'],
                     yearPrefix: 'AC '
                 },
-        		events: []
+            	events: []
             }
+        }
+        if(!_.has(state.Calendar,'events')){
+            log('-- Adding events[]');
+            state.Calendar.events = [];
         }
     },
     
@@ -333,7 +337,7 @@ var Calendar = Calendar || {
         if (state.Calendar.events[0]) {
             for (var i = 0; i < state.Calendar.events.length; i++) {
                 var thisEvent = state.Calendar.events[i]
-                if (name.toUpperCase() == thisEvent[0].toUpperCase()) {
+                if (name && name.toUpperCase() == thisEvent[0].toUpperCase()) {
                     state.Calendar.events.splice(i,1)
                 };
             };
@@ -369,7 +373,7 @@ var Calendar = Calendar || {
                 if (thisEvent[2] === null){
                     
                 } else {
-                    if (thisEvent[2].toUpperCase() == "GM") {
+                    if (thisEvent[2] && thisEvent[2].toUpperCase() == "GM") {
                     events.splice(i,1);
                 };
             };
@@ -522,7 +526,7 @@ var Calendar = Calendar || {
                 break;
                 
             case 'AddEvent':
-                if (tokens[1].toUpperCase() === "TODAY" ) {
+                if (tokens[1] && tokens[1].toUpperCase() === "TODAY" ) {
                     if (tokens[2].toUpperCase() === "GM") {
                         Calendar.addCalendarEvent (concatenateEventName(3),state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year,"GM");
                         sendMsg ("Your GM event has been added TODAY");
@@ -531,7 +535,7 @@ var Calendar = Calendar || {
                         sendMsg ("Your PUBLIC event has been added TODAY");
                     };   
                 } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === false && isNaN(parseInt(tokens[3])) === false) {
-                    if (tokens[4].toUpperCase() === "GM" ) {
+                    if (tokens[4] && tokens[4].toUpperCase() === "GM" ) {
                         Calendar.addCalendarEvent (concatenateEventName(4),parseInt(tokens[1]),parseInt(tokens[2]),parseInt(tokens[3]),"GM");
                         sendMsg ("Your GM event has been added at the SPECIFIED DATE")
                     } else {
@@ -559,7 +563,7 @@ var Calendar = Calendar || {
                 break;
                 
             case 'GetEvents':
-                var targetFrame = tokens[1].toUpperCase()
+                var targetFrame = tokens[1] && tokens[1].toUpperCase();
                 if (targetFrame === "PAST" ) {
                     sendChat ("CalendarEvents","/w " + senderID[0] + returnEventRange (-1,"Past Events"));
                 } else if (targetFrame === "PRESENT") {
