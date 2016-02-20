@@ -1,4 +1,4 @@
-//Pathfinder Wound Threshold Script -- Last Updated 10/23/15
+//Pathfinder Wound Threshold Script -- Last Updated 02/20/16
 //Written by Brent T. contact: https://app.roll20.net/users/391008/brent-t
 //GitHub: https://github.com/Cephalopd/Roll20ScriptsMASTER/blob/master/
 	  on("change:token:bar3_value", function(obj,prev) {
@@ -34,7 +34,7 @@
             case 0:
                 obj.set ('tint_color', 'transparent');
                 if (characterID && currentCharacterWoundThresholdAttribute != threshold) {
-                    sendChat ('WoundManager', characterName + ' is now at full capacity')
+                    //sendChat ('WoundManager', characterName + ' is now at full capacity')
                     currentCharacterWoundThresholdAttribute.set('current', threshold)
                 } else {
                     return;
@@ -43,7 +43,7 @@
             case 1:
                 obj.set ('tint_color', '#ffff00');
                 if (characterID && currentCharacterWoundThresholdAttribute != threshold) {
-                    sendChat ('WoundManager', characterName + ' is now grazed')
+                    //sendChat ('WoundManager', characterName + ' is now grazed')
                     currentCharacterWoundThresholdAttribute.set('current', threshold)
                 } else {
                     return;
@@ -52,7 +52,7 @@
             case 2:
                 obj.set ('tint_color', '#ff9900');
                 if (characterID && currentCharacterWoundThresholdAttribute != threshold) {
-                    sendChat ('WoundManager', characterName + ' is now wounded')
+                    //sendChat ('WoundManager', characterName + ' is now wounded')
                     currentCharacterWoundThresholdAttribute.set('current', threshold)
                 } else {
                     return;
@@ -61,7 +61,7 @@
             case 3:
                 obj.set ('tint_color', '#ff0000');
                 if (characterID && currentCharacterWoundThresholdAttribute != threshold) {
-                    sendChat ('WoundManager', characterName + ' is now critical')
+                    //sendChat ('WoundManager', characterName + ' is now critical')
                     currentCharacterWoundThresholdAttribute.set('current', threshold)
                 } else {
                     return;
@@ -70,7 +70,7 @@
             case -1:
                 obj.set ('tint_color', '#000000');
                 if (characterID && currentCharacterWoundThresholdAttribute != threshold) {
-                    sendChat ('WoundManager', characterName + ' is unconscious')
+                    //sendChat ('WoundManager', characterName + ' is unconscious')
                 } else {
                     return;
                 }
@@ -78,13 +78,15 @@
                         case -2:
                 obj.set ('tint_color', '#000000');
                 if (characterID && currentCharacterWoundThresholdAttribute != threshold) {
-                    sendChat ('WoundManager', characterName + ' is unconscious')
+                    //sendChat ('WoundManager', characterName + ' is unconscious')
                 } else {
                     return;
                 }
             break;
           };
-          }; 
-          setLogic (currentWoundThreshold()); 
+          };
+	if (maxHealth !== null) {
+          setLogic (currentWoundThreshold());
+	  };
   });
       
