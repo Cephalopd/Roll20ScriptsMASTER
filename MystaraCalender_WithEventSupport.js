@@ -70,7 +70,7 @@ var Calendar = Calendar || {
                         'Kaldmont'],
                     yearPrefix: 'AC '
                 },
-            	events: []
+                events: []
             }
         }
         if(!_.has(state.Calendar,'events')){
@@ -526,33 +526,34 @@ var Calendar = Calendar || {
                 break;
                 
             case 'AddEvent':
-                if (tokens[1] && tokens[1].toUpperCase() === "TODAY" ) {
-                    if (tokens[2].toUpperCase() === "GM") {
-                        Calendar.addCalendarEvent (concatenateEventName(3),state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year,"GM");
-                        sendMsg ("Your GM event has been added TODAY");
-                    } else {
-                        Calendar.addCalendarEvent (concatenateEventName(3),state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year);
-                        sendMsg ("Your PUBLIC event has been added TODAY");
-                    };   
+				if (tokens[1] && tokens[1].toUpperCase() === "TODAY" ) {
+                        Calendar.addCalendarEvent (concatenateEventName(2),state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year);
+                        sendMsg ("Your PUBLIC event has been added TODAY");    
                 } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === false && isNaN(parseInt(tokens[3])) === false) {
-                    if (tokens[4] && tokens[4].toUpperCase() === "GM" ) {
-                        Calendar.addCalendarEvent (concatenateEventName(4),parseInt(tokens[1]),parseInt(tokens[2]),parseInt(tokens[3]),"GM");
-                        sendMsg ("Your GM event has been added at the SPECIFIED DATE")
-                    } else {
                         Calendar.addCalendarEvent (concatenateEventName(4),parseInt(tokens[1]),parseInt(tokens[2]),parseInt(tokens[3]));
-                        sendMsg ("Your PUBLIC event has been added at the SPECIFIED DATE")
-                    };
+                        sendMsg ("Your PUBLIC event has been added at the SPECIFIED DATE");
                 } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === true) {
 					var currentIndex = Calendar.calcDateIndex (state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year);
 					var newIndex = currentIndex + parseInt(tokens[1])
 					var newDate = Calendar.calcIndexToDate (newIndex)
-					if (tokens[2].toUpperCase === "GM") {
-						Calendar.addCalendarEvent(concatenateEventName(3),newDate[0],newDate[1],newDate[2],"GM");
-						sendMsg ("Your GM event has been added " + tokens[1] + " days from today");
-					} else {
 						Calendar.addCalendarEvent(concatenateEventName(2),newDate[0],newDate[1],newDate[2]);
 						sendMsg ("Your PUBLIC event has been added " + tokens[1] + " days from today");
-					};
+				};
+                break;
+				
+			case 'AddEventGM':
+				if (tokens[1] && tokens[1].toUpperCase() === "TODAY" ) {
+                        Calendar.addCalendarEvent (concatenateEventName(2),state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year,"GM");
+                        sendMsg ("Your GM event has been added TODAY");    
+                } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === false && isNaN(parseInt(tokens[3])) === false) {
+                        Calendar.addCalendarEvent (concatenateEventName(4),parseInt(tokens[1]),parseInt(tokens[2]),parseInt(tokens[3]),"GM");
+                        sendMsg ("Your GM event has been added at the SPECIFIED DATE");
+                } else if (isNaN(parseInt(tokens[1])) === false && isNaN(parseInt(tokens[2])) === true) {
+					var currentIndex = Calendar.calcDateIndex (state.Calendar.now.day,state.Calendar.now.month,state.Calendar.now.year);
+					var newIndex = currentIndex + parseInt(tokens[1])
+					var newDate = Calendar.calcIndexToDate (newIndex)
+						Calendar.addCalendarEvent(concatenateEventName(2),newDate[0],newDate[1],newDate[2],"GM");
+						sendMsg ("Your GM event has been added " + tokens[1] + " days from today");
 				};
                 break;
             
@@ -631,3 +632,4 @@ on("ready",function(){
     Calendar.CheckInstall(); 
     Calendar.RegisterEventHandlers();
 });
+
